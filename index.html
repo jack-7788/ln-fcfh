@@ -9,6 +9,7 @@
             rel="stylesheet"
             href="./node_modules/cesium/Build/Cesium/Widgets/widgets.css"
         />
+        <link rel="stylesheet" href="./node_modules/layui/dist/css/layui.css" />
         <style>
             html,
             body,
@@ -19,17 +20,22 @@
                 padding: 0;
                 overflow: hidden;
             }
+            .detail-class dl {
+                display: flex;
+                gap: 15px;
+            }
         </style>
     </head>
     <body>
-        <input
+        <!-- <input
             type="button"
             onclick="addBoxClassificationPrimitive()"
             value="点击分层分户"
-        />
+        /> -->
         <div id="cesiumContainer"></div>
         <!-- 引入Cesium的JavaScript库 -->
         <script src="./node_modules/cesium/Build/Cesium/Cesium.js"></script>
+        <script src="./node_modules/layui/dist/layui.js"></script>
         <script src="./allList.js"></script>
         <script>
             // 这个是 Cesium 的 授权token
@@ -64,8 +70,7 @@
                     console.error('An error occurred: ', error)
                 })
 
-           
-            const addBoxClassificationPrimitive = () => {
+            function addBoxClassificationPrimitive() {
                 allList.forEach(item => fn(item))
             }
             function fn(item) {
@@ -195,7 +200,25 @@
                     item => item.layers === Number(layers)
                 )
                 console.log('layersItem: ', layersItem.attribute)
+                show(layersItem.attribute,id)
             }
+
+            function show(attribute,id) {
+                layer.open({
+                    area: ['500px', '300px'],
+                    title: '详情',
+                    skin: 'detail-class',
+                    content: `
+                            <dl><dt>门牌号:</dt><dd>${id}</dd></dl>
+                            <dl><dt>宽度:</dt><dd>${attribute.width}</dd></dl>
+                            <dl><dt>高度:</dt><dd>${attribute.height}</dd></dl>
+                            <dl><dt>是否出租:</dt>
+                                <dd> ${attribute.rent ? '是' : '否'} </dd>
+                                </dl>
+                        `,
+                })
+            }
+            addBoxClassificationPrimitive()
         </script>
     </body>
 </html>
