@@ -30,18 +30,19 @@
         <div id="cesiumContainer"></div>
         <!-- 引入Cesium的JavaScript库 -->
         <script src="./node_modules/cesium/Build/Cesium/Cesium.js"></script>
+        <script src="./allList.js"></script>
         <script>
             // 这个是 Cesium 的 授权token
             /*
-          1- 先注册账号 https://ion.cesium.com/tokens?page=1
-          2- 复制 Access Tokens
-          */
+            1- 先注册账号 https://ion.cesium.com/tokens?page=1
+            2- 复制 Access Tokens
+            */
             Cesium.Ion.defaultAccessToken =
                 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwMTUwMGJhMy00NjFmLTQ0ODctYjI1Ny01Y2Y0Yjc5Yjk5MDciLCJpZCI6MjE2OTQyLCJpYXQiOjE3MTYzNjAwODV9.OJT4Jr6ECBRVz4oyevdcXPuCUaDxwJ0HTwf3kIO9AH4'
 
             /*
-                获取 cesium 放置的位置
-                */
+                  获取 cesium 放置的位置
+                  */
             const viewer = new Cesium.Viewer('cesiumContainer')
 
             // 创建一个Cesium3DTileset实例并添加到场景中
@@ -62,21 +63,12 @@
                     // 处理加载错误
                     console.error('An error occurred: ', error)
                 })
-            const allList = [
-                [116.404804, 39.909125, 49.58],
-                [116.405242, 39.909118, 49.58],
-                [116.404193, 39.909127, 49.58],
-                [116.404634, 39.909119, 49.58],
-                [116.406289, 39.909129, 49.58],
-                [116.405956, 39.909126, 49.58],
-                [116.405914, 39.909116, 49.58],
-                [116.405583, 39.909121, 49.58],
-            ]
 
+           
             const addBoxClassificationPrimitive = () => {
-                const res = allList.map(item => fn(item))
+                allList.forEach(item => fn(item))
             }
-            function fn(params) {
+            function fn(item) {
                 let length = 18.0,
                     width = 20.0,
                     height = 3.5,
@@ -87,9 +79,9 @@
                     y: 5532291.539549444,
                     z: 2436368.8372620787,
                 }
-                var cartesian3 = Cesium.Cartesian3.fromDegrees(...params)
+                var cartesian3 = Cesium.Cartesian3.fromDegrees(...item.position)
 
-                for (var i = 0; i < 26; i++) {
+                for (var i = 0; i < item.detail.length; i++) {
                     //用于将一个东-北-上（ENU）坐标系中的点转换到一个固定的笛卡尔坐标系中。这个方法通常用于将飞机或无人机的位置从它们的局部坐标系转换到全局坐标系。
                     var modelMatrix =
                         Cesium.Transforms.eastNorthUpToFixedFrame(cartesian3)
@@ -127,7 +119,7 @@
                                 true
                             ), //设置初始化后是否显示
                         },
-                        id: i + 1,
+                        id: item.buildNum + '-' + `${i + 1}`,
                     })
                     buildingHighlight1 = viewer.scene.primitives.add(
                         new Cesium.ClassificationPrimitive({
@@ -144,8 +136,11 @@
                 getCartesianCoordinate(movement.position)
                 var pickedObject = viewer.scene.pick(movement.position)
                 if (Cesium.defined(pickedObject) && pickedObject.primitive) {
-                    if (pickedObject.id)
-                        alert('你点击了第' + pickedObject.id + '户')
+                    if (pickedObject.id) {
+                        getAttribute(pickedObject.id)
+                        console.log('你点击了第' + pickedObject.id + '户')
+                    }
+
                     // 在这里添加你需要的点击事件处理逻辑
                 }
             }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
@@ -189,6 +184,17 @@
                     return new Cesium.Color(0.5, 0.5, 1.0, 0.5)
                 }
                 return new Cesium.Color(0.0, 1.0, 1.0, 0.5)
+            }
+
+            function getAttribute(id) {
+                const [buildNum, layers] = id.split('-')
+                const buildItem = allList.find(
+                    item => item.buildNum === Number(buildNum)
+                )
+                const layersItem = buildItem.detail.find(
+                    item => item.layers === Number(layers)
+                )
+                console.log('layersItem: ', layersItem.attribute)
             }
         </script>
     </body>
